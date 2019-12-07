@@ -217,9 +217,11 @@ def main():
 
     ''' word_list -> {word: freq} pair for each document -> list of these dict for all document '''
     ''' word_list_2 without stop words -> {word: freq} pair for each document -> list of these dict for all document '''
+    print("Creating LIST of each word, word_count pair ..."),
     for index in range(NO_OF_FILES):
         word_freq_dict_list[index] = word_list_to_freq_dict(doc_word_list[index])
         word_freq_dict_list_2[index] = word_list_to_freq_dict(stop_word_removed_word_list[index])
+    print("DONE.\n")
 
 
     ''' word_dict_all -> creates dict of all unique words (all doc combined) {unique_word: word_count} pair '''
@@ -227,11 +229,13 @@ def main():
     word_dict_all = {}
     word_dict_all_2 = {}
 
+    print("Creating DICT of (unique_word, word_count) pair ..."),
     for index in range(NO_OF_FILES):
         for key in word_freq_dict_list[index]:
             word_dict_all[key] = word_freq_dict_list[index][key]
         for key in word_freq_dict_list_2[index]:
             word_dict_all_2[key] = word_freq_dict_list_2[index][key]
+    print("DONE.\n")
 
     ''' Test for unique word count, with and without stop words '''
     # print("unique word count before after stemming")
