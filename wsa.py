@@ -194,7 +194,7 @@ def main():
     ''' Porter Stemmer '''
     stemmer = PorterStemmer()
 
-    print("Stemming (Portal Stemmer) ..."),
+    print("Stemming (Porter Stemmer) ..."),
     for index in range(NO_OF_FILES):
         # [stemmer.stem(word) for word in doc_word_list[index]]
         stemmed_word_list[index] = [stemmer.stem(word) for word in doc_word_list[index]]
