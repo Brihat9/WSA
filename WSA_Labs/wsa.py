@@ -7,18 +7,31 @@ import re
 import nltk
 import operator
 import pprint # prettier print for dict and list
+import copy # used to copy df dict to idf dict
+import json # for storing and retrieving tf-idf values to/from file
+import os # for tf-idf retrieval from file
 
 from nltk.corpus import stopwords # for stop word Removal
 from nltk.stem.porter import * # for Porter Stemmer
 
 # total number of cranfield document to consider [1-1400]
 NO_OF_FILES = 1400
+NO_OF_QUERY_DOCS = 10
+MAX_RELEVANT_DOCS = 10
+
+TF_FILE = "tfs\\tf"
+TFIDF_FILE = "tfidfs\\tfidf"
+
+# TFIDF_FILE_ALL = "tfidfs\\tfidfall" # Complete TF-IDF in one file
+
+stemmer = PorterStemmer()
+stop_words = set(stopwords.words('english'))
 
 
 def header():
     ''' INFO to display on top '''
     print("\nWSA Assignment 1")
-    print("Brihat Ratna Bajracharya\n19/075\nCDCSIT\n-------------")
+    print("Brihat Ratna Bajracharya\n19/075\nCDCSIT\n------------------------")
 
 
 def cleanhtml(raw_html):
@@ -118,11 +131,15 @@ def computeIDF(documents,wordDict):
     import math
     N = len(documents)
 
-    idfDict = dict.fromkeys(wordDict.keys(), 0)
+    ''' document frequency dict '''
+    df = dict.fromkeys(wordDict.keys(), 0)
     for document in documents:
         for word, val in document.items():
             if val > 0:
-                idfDict[word] += 1
+                df[word] += 1
+    # print("Document Frequency:\n", df)
+
+    idfDict = copy.deepcopy(df)
 
     for word, val in idfDict.items():
         idfDict[word] = math.log(N / float(val))
@@ -142,6 +159,41 @@ def computeTFIDF(tfBagOfWords, idfs):
     return tfidf
 
 
+def get_matching_docs(tf_idf_list, query, rev_doc_num = MAX_RELEVANT_DOCS):
+    ''' returns list of relevant documents for given query
+
+        parameter: tf_idf_list = list of dict of tf-idf for all documents
+                   query = query document
+                   rev_doc_num = number of relevant document to return
+        result: list (relevant document number for query)
+    '''
+    query_content_wo_tags = cleanhtml(query)
+    query_tokens = tokenize(query_content_wo_tags)
+    query_stemmed= [stemmer.stem(word) for word in query_tokens]
+    stop_word_removed_query = [w for w in query_stemmed if not w in stop_words]
+
+    query_weight = dict()
+
+    for index in range(NO_OF_FILES):
+        for key, val in tf_idf_list[index].items():
+            for token in query_tokens:
+                if token == key:
+                    try:
+                        query_weight[index+1] += tf_idf_list[index][key]
+                    except:
+                        query_weight[index+1] = tf_idf_list[index][key]
+
+    qweight = copy.deepcopy(query_weight)
+    qweight = sorted(qweight.items(), key=lambda x: x[1], reverse=True)
+
+    relevant_docs_list = []
+    rev_doc_count = 0
+    for tuple in qweight:
+        if rev_doc_count < rev_doc_num:
+            relevant_docs_list.append(tuple[0])
+            rev_doc_count += 1
+
+    return relevant_docs_list
 
 def main():
     ''' MAIN FUNCTION starts here '''
@@ -192,7 +244,8 @@ def main():
 
 
     ''' Porter Stemmer '''
-    stemmer = PorterStemmer()
+    ''' made global '''
+    # stemmer = PorterStemmer()
 
     print("Stemming (Porter Stemmer) ..."),
     for index in range(NO_OF_FILES):
@@ -202,7 +255,8 @@ def main():
 
 
     ''' Stop Word Removal '''
-    stop_words = set(stopwords.words('english'))
+    ''' made global '''
+    # stop_words = set(stopwords.words('english'))
 
     print("Removing stop words ..."),
     for index in range(NO_OF_FILES):
@@ -246,39 +300,96 @@ def main():
     ''' Question 2 of WSA 1 Assigment '''
     print("Solution to Q2 of WSA 1\n")
 
-    print(" With Stop Words (Question 2)\n -------------------")
+    print(" With Stop Words (Question 2)\n ----------------------------")
     question2(word_dict_all)
 
-    print("\n\n Without Stop Words (Question 3)\n ----------------------")
+    print("\n\n Without Stop Words (Question 3)\n -------------------------------")
     question2(word_dict_all_2)
 
 
-    ''' TF, IDF, TF-IDF part here '''
-    ''' calculate term frequencies for each document '''
-    print("\nCalculating Term Frequencies ..."),
-    for index in range(NO_OF_FILES):
-        tf_list[index] = computeTF(word_freq_dict_list_2[index], stop_word_removed_word_list[index])
-    print("DONE.\n")
+    path, dirs, files = next(os.walk("tfidfs"))
+    file_count = len(files)
 
-    ''' calculate inverse document frequencies of all document '''
-    print("Calculating Inverse Document Frequencies ..."),
-    idf = computeIDF(word_freq_dict_list_2,word_dict_all_2)
-    print("DONE.\n")
+    if file_count >= NO_OF_FILES:
+        print("\nPre-computed TF-IDF values found")
+        print(" Reading pre-computed TF-IDF values ..."),
+        for index in range(NO_OF_FILES):
+            tfidf_file = open("tfidfs\\" + files[index], 'r')
+            tfidf_dict_res = json.loads(tfidf_file.readline())
+            tf_idf_list[index] = tfidf_dict_res
+        print("DONE.")
 
-    ''' calculates TF-IDF for all document '''
-    print("Calculating TF-IDF ..."),
-    for index in range(NO_OF_FILES):
-        tf_idf_list[index] = computeTFIDF(tf_list[index], idf)
-    print("DONE.\n")
+        ''' READING COMPLETE TF-IDF IN ONE FILE '''
+        # tfidf_file_all = open(TFIDF_FILE_ALL, 'r')
+        # tf_idf_list = json.loads(tfidf_file_all.readline())
+        # tfidf_file_all.close()
+    else:
+        ''' TF, IDF, TF-IDF part here '''
+        ''' calculate term frequencies for each document '''
+        print("\nPre-computed TF-IDF values not found")
+        print("\nCalculating Term Frequencies ..."),
+        for index in range(NO_OF_FILES):
+            tf_file = open(TF_FILE + str(index).zfill(4), "w+")
+            tf_list[index] = computeTF(word_freq_dict_list_2[index], stop_word_removed_word_list[index])
+            tf_file.write(str(tf_list[index]))
+            tf_file.close()
+        print("DONE.\n")
+
+        ''' calculate inverse document frequencies of all document '''
+        print("Calculating Inverse Document Frequencies ..."),
+        idf = computeIDF(word_freq_dict_list_2,word_dict_all_2)
+        print("DONE.\n")
+
+        ''' calculates TF-IDF for all document '''
+        print("Calculating TF-IDF ..."),
+        for index in range(NO_OF_FILES):
+            tfidf_file = open(TFIDF_FILE + str(index).zfill(4), "w+")
+            tf_idf_list[index] = computeTFIDF(tf_list[index], idf)
+            json.dump(tf_idf_list[index], tfidf_file)
+            tfidf_file.close()
+
+        ''' Storing TF-IDF to single file '''
+        # tfidf_file_all = open(TFIDF_FILE_ALL, "w+")
+        # json.dump(tf_idf_list, tfidf_file_all)
+        # tfidf_file_all.close()
+
+        print("DONE.\n")
 
 
-    ''' Display TF, IDF and TF-IDF values '''
-    # print(tf_list)
-    # print(idf)
-    # print(tf_idf_list)
+        ''' Display TF, IDF and TF-IDF values '''
+        # print(tf_list)
+        # print(idf)
+        # print(tf_idf_list)
 
-    ''' Pretty display TF-IDF '''
-    # pprint.pprint(tf_idf_list)
+        ''' Pretty display TF-IDF '''
+        # pprint.pprint(tf_idf_list)
+
+    ''' MATCHING AND RANKING PART HERE '''
+    query_docfile = open("query_documents", 'r')
+    query_docs = [None] * NO_OF_QUERY_DOCS
+
+    ''' reading query documents '''
+    for index in range(NO_OF_QUERY_DOCS):
+        query_docs[index] = query_docfile.readline()
+
+    ''' for all QUERY DOCS '''
+    relevant_docs_res = [None] * NO_OF_QUERY_DOCS
+
+    ''' Finding relevant documents for queries '''
+    print("\nFinding relevant documents for queries ...")
+
+    for index in range(NO_OF_QUERY_DOCS):
+        print(" Matching relevant documents for Query Doc " + str(index+1) + " ..."),
+        relevant_docs_res[index] = get_matching_docs(tf_idf_list, query_docs[index])
+        print("DONE.")
+
+    print("DONE.")
+
+    print("\n\nRESULT: RELEVANT DOCUMENT FOR QUERIES")
+    print("-------------------------------------")
+    for index in range(NO_OF_QUERY_DOCS):
+        print("\nMatched relevant documents for Query Doc  " + str(index+1))
+        print(relevant_docs_res[index])
 
     print("\nDONE.")
 
