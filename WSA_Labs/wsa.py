@@ -5,22 +5,30 @@
 
 import re
 import nltk
-import operator
+import math # for log function
 import pprint # prettier print for dict and list
 import copy # used to copy df dict to idf dict
 import json # for storing and retrieving tf-idf values to/from file
 import os # for tf-idf retrieval from file
+import numpy as np # to calculate cosine similarity
 
+from collections import Counter # for unique count
 from nltk.corpus import stopwords # for stop word Removal
 from nltk.stem.porter import * # for Porter Stemmer
 
 # total number of cranfield document to consider [1-1400]
 NO_OF_FILES = 1400
-NO_OF_QUERY_DOCS = 10
-MAX_RELEVANT_DOCS = 10
+NO_OF_QUERY_DOCS = 10 # total number of query documents [1-10]
+MAX_RELEVANT_DOCS = 10 # default number of relevant document to return
 
 TF_FILE = "tfs\\tf"
 TFIDF_FILE = "tfidfs\\tfidf"
+
+''' some global variables defined for cosine similarity calculation '''
+UNIQUE_WORD_LIST = []
+UNIQUE_WORD_COUNT = 0
+DOCUMENT_FREQUENCY = {}
+TF_IDF_LIST = []
 
 # TFIDF_FILE_ALL = "tfidfs\\tfidfall" # Complete TF-IDF in one file
 
@@ -121,6 +129,22 @@ def computeTF(wordDict, bagOfWords):
     return tfDict
 
 
+def computeDF(documents, wordDict):
+    ''' calculates and returns document frequency for all documents
+
+        parameter: documents = list of {'unique_key': word_count} for all doc
+                   wordDict = {'unique_key': word_count} for all doc combined
+
+        result: dict of {word: document_frequency} for all document
+    '''
+    df = dict.fromkeys(wordDict.keys(), 0)
+    for document in documents:
+        for word, val in document.items():
+            if val > 0:
+                df[word] += 1
+    return df
+
+
 def computeIDF(documents,wordDict):
     ''' computes inverse document frequency for all doc
 
@@ -132,12 +156,8 @@ def computeIDF(documents,wordDict):
     N = len(documents)
 
     ''' document frequency dict '''
-    df = dict.fromkeys(wordDict.keys(), 0)
-    for document in documents:
-        for word, val in document.items():
-            if val > 0:
-                df[word] += 1
-    # print("Document Frequency:\n", df)
+    ''' changed: now calls separate function '''
+    df = computeDF(documents, wordDict)
 
     idfDict = copy.deepcopy(df)
 
@@ -195,9 +215,163 @@ def get_matching_docs(tf_idf_list, query, rev_doc_num = MAX_RELEVANT_DOCS):
 
     return relevant_docs_list
 
+
+def create_document_vector(word_dict_list):
+    ''' creates document vector for all documents '''
+
+    ''' GLOBAL VARIABLES '''
+    global NO_OF_FILES
+    global UNIQUE_WORD_LIST
+    global UNIQUE_WORD_COUNT
+    global TF_IDF_LIST
+
+    # initialize num_of_doc x total_unique_word_count matrix
+    document_vectors = np.zeros((NO_OF_FILES, UNIQUE_WORD_COUNT))
+
+    for index in range(NO_OF_FILES):
+        word_list = word_dict_list[index].keys()
+        for word in word_list:
+            try:
+                word_index = UNIQUE_WORD_LIST.index(word)
+                document_vectors[index][word_index] = TF_IDF_LIST[index][word]
+            except:
+                pass
+
+    ''' testing purpose, shows non zero element of document_vectors '''
+    # for index in range(NO_OF_FILES):
+    #     for index2 in range(len(unique_word_list)):
+    #         if document_vectors[index][index2] != 0.0:
+    #             print(index, index2, document_vectors[index][index2])
+
+    return document_vectors
+
+
+def preprocess_query(query):
+    ''' functions that preprocesses given query text and
+        returns list of tokens
+    '''
+
+    # removes html tags (if any)
+    query_content_wo_tags = cleanhtml(query)
+
+    # tokenize given query doc
+    query_tokens = tokenize(query_content_wo_tags)
+
+    # applies Porter Stemmer to tokens
+    query_stemmed= [stemmer.stem(word) for word in query_tokens]
+
+    # removes stop words from stemmed tokens
+    stop_word_removed_query = [w for w in query_stemmed if not w in stop_words]
+
+    # returns processed tokens for given query
+    return stop_word_removed_query
+
+
+def generate_document_vector(query_doc):
+    ''' generates document vector given query '''
+
+    ''' GLOBAL VARIABLES '''
+    global NO_OF_FILES
+    global UNIQUE_WORD_LIST
+    global UNIQUE_WORD_COUNT
+    global DOCUMENT_FREQUENCY
+
+    # first preprocess the query
+    processed_query_tokens = preprocess_query(query_doc)
+
+    # initialize query vector, default value 0
+    query_vector = np.zeros(UNIQUE_WORD_COUNT)
+    # print("Init query_vector (all zeros): ", query_vector)
+
+    # creates a {word: word_count} for tokens in query
+    query_token_count_dict = Counter(processed_query_tokens)
+
+    # number of tokens in query, total word count in query document
+    query_word_count = len(processed_query_tokens)
+    # print("Query Word Count: ", query_word_count)
+
+    # main process here
+    for token in np.unique(processed_query_tokens):
+        # calculates term frequencies of all tokens of query doc
+        query_tf = query_token_count_dict[token] / float(query_word_count)
+
+        # calculates document_frequency of token
+        query_df = 0
+        try:
+            query_df = DOCUMENT_FREQUENCY[token]
+        except:
+            pass
+
+        ''' for testing purpose: shows calculated document frequency '''
+        # print("query_df: ", query_df)
+
+        # calculates inverse document frequency for all tokens of query doc
+        query_idf = math.log((NO_OF_FILES + 1) / float(query_df + 1))
+
+        # creating query vector using query idf values
+        try:
+            word_index = UNIQUE_WORD_LIST.index(token)
+            query_vector[word_index] = query_tf * query_idf
+        except:
+            pass
+
+    ''' for testing purpose: shows generated query vector '''
+    # print("Generated Query Vector: ", query_vector)
+    # print("Generated Query Vector (Magnitude): ", np.linalg.norm(query_vector))
+
+    return query_vector
+
+
+def calculate_cosine_similarity(doc_vec_1, doc_vec_2):
+    ''' calculates and returns cosine similarity between two document vectors '''
+    cosine_similarity = np.dot(doc_vec_1,doc_vec_2) / (np.linalg.norm(doc_vec_1) * np.linalg.norm(doc_vec_2))
+    return cosine_similarity
+
+
+def get_relevant_docs_cosine_similarity(query, document_vectors, k = MAX_RELEVANT_DOCS):
+    ''' returns list of k- most relevant docs for given query '''
+
+    ''' GLOBAL VARIABLES '''
+    global UNIQUE_WORD_LIST
+    global DOCUMENT_FREQUENCY
+    global UNIQUE_WORD_COUNT
+
+    # first generate query vector for given query
+    print("   Generating Query Vector ..."),
+    query_vector = generate_document_vector(query)
+    print("DONE.")
+    # print("Query Vector: ")
+    # print(query_vector)
+
+    cos_sim = []
+    count = 1
+    # calculate cosine similarity of query with all other documents
+    for document_vector in document_vectors:
+        print("   Calculating Cosine Similarity with Document #" + str(count) + "\r"),
+        cos_sim.append(calculate_cosine_similarity(query_vector, document_vector))
+        count += 1
+    # print("Cosine Similarity of Query with all documents: ")
+    # print(cos_sim)
+
+    # obtain k- most relevant document index
+    out = np.array(cos_sim).argsort()[-k:][::-1] + 1
+    # print("\n\nRelevant docs: ")
+    # print(out)
+
+    return out
+
+
 def main():
     ''' MAIN FUNCTION starts here '''
     header()
+
+    ''' GLOBAL VARIABLES '''
+    global UNIQUE_WORD_LIST
+    global UNIQUE_WORD_COUNT
+    global DOCUMENT_FREQUENCY
+    global NO_OF_FILES
+    global NO_OF_QUERY_DOCS
+    global TF_IDF_LIST
 
     ''' REQUIRED VARIABLES '''
     doc = [None] * NO_OF_FILES
@@ -317,6 +491,7 @@ def main():
             tfidf_file = open("tfidfs\\" + files[index], 'r')
             tfidf_dict_res = json.loads(tfidf_file.readline())
             tf_idf_list[index] = tfidf_dict_res
+            tfidf_file.close()
         print("DONE.")
 
         ''' READING COMPLETE TF-IDF IN ONE FILE '''
@@ -365,6 +540,8 @@ def main():
         # pprint.pprint(tf_idf_list)
 
     ''' MATCHING AND RANKING PART HERE '''
+    print("\n\nFinding Relevant Documents ...\n------------------------------")
+    print(" Reading Query Documents ..."),
     query_docfile = open("query_documents", 'r')
     query_docs = [None] * NO_OF_QUERY_DOCS
 
@@ -372,24 +549,61 @@ def main():
     for index in range(NO_OF_QUERY_DOCS):
         query_docs[index] = query_docfile.readline()
 
+    query_docfile.close()
+    print("DONE.")
+
     ''' for all QUERY DOCS '''
     relevant_docs_res = [None] * NO_OF_QUERY_DOCS
 
     ''' Finding relevant documents for queries '''
-    print("\nFinding relevant documents for queries ...")
+    print("\n Finding relevant documents for queries ...")
 
     for index in range(NO_OF_QUERY_DOCS):
-        print(" Matching relevant documents for Query Doc " + str(index+1) + " ..."),
+        print("  Matching relevant documents for Query Doc " + str(index+1) + " ..."),
         relevant_docs_res[index] = get_matching_docs(tf_idf_list, query_docs[index])
         print("DONE.")
 
-    print("DONE.")
+    print(" DONE.")
 
     print("\n\nRESULT: RELEVANT DOCUMENT FOR QUERIES")
     print("-------------------------------------")
     for index in range(NO_OF_QUERY_DOCS):
         print("\nMatched relevant documents for Query Doc  " + str(index+1))
         print(relevant_docs_res[index])
+
+
+    ''' MATCHING RELEVANT DOCUMENT USING COSINE SIMILARITY '''
+    print("\n\nMatching relevant documents using Cosine Similarity ...")
+    print("-------------------------------------------------------")
+    UNIQUE_WORD_LIST = word_dict_all_2.keys()
+    UNIQUE_WORD_COUNT = len(UNIQUE_WORD_LIST)
+    TF_IDF_LIST = copy.deepcopy(tf_idf_list)
+    # print("UNIQUE_WORD_COUNT:",UNIQUE_WORD_COUNT)
+
+    print(" Calculating Document Vectors for all document ..."),
+    document_vectors = create_document_vector(word_freq_dict_list_2)
+    print("DONE.")
+
+    relevant_docs_cossim_list = [None] * NO_OF_QUERY_DOCS
+
+    print(" Calculating Document Frequency for all documents ..."),
+    DOCUMENT_FREQUENCY = computeDF(word_freq_dict_list_2, word_dict_all_2)
+    print("DONE.")
+
+    print("\n Finding relevant documents for queries ...")
+    for index in range(NO_OF_QUERY_DOCS):
+        print("  Finding relevant documents for query #" + str(index + 1) + " ...")
+        query_doc = query_docs[index]
+        relevant_docs_cossim_list[index] = get_relevant_docs_cosine_similarity(query_doc, document_vectors)
+        print("\n  DONE.\n")
+    print("DONE.")
+
+    print("\n\nRESULT: RELEVANT DOCUMENT FOR QUERIES (USING COSINE SIMILARITY)")
+    print("---------------------------------------------------------------")
+    for index in range(NO_OF_QUERY_DOCS):
+        print("\nMatched relevant documents for Query #" + str(index + 1))
+        # print(" " + str(query_docs[index].split("\n")[0]))
+        print(list(relevant_docs_cossim_list[index]))
 
     print("\nDONE.")
 
