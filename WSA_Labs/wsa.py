@@ -15,14 +15,25 @@ import numpy as np # to calculate cosine similarity
 from collections import Counter # for unique count
 from nltk.corpus import stopwords # for stop word Removal
 from nltk.stem.porter import * # for Porter Stemmer
+from numpy import asarray, savetxt, loadtxt # for storing and loading document vectors
 
 # total number of cranfield document to consider [1-1400]
 NO_OF_FILES = 1400
 NO_OF_QUERY_DOCS = 10 # total number of query documents [1-10]
 MAX_RELEVANT_DOCS = 10 # default number of relevant document to return
 
+folders = ["tfs", "tfidfs", "docvec"]
+
+# create folders if they do not exist
+for folder_name in folders:
+    if not os.path.exists(folder_name):
+        os.mkdir(folder_name)
+
 TF_FILE = "tfs\\tf"
 TFIDF_FILE = "tfidfs\\tfidf"
+
+DOC_VEC_FILE = "docvec\\docvecall.csv"
+DOC_VEC_LENGTH_FILE = "docvec\\docveclength"
 
 ''' some global variables defined for cosine similarity calculation '''
 UNIQUE_WORD_LIST = []
@@ -33,7 +44,13 @@ TF_IDF_LIST = []
 # TFIDF_FILE_ALL = "tfidfs\\tfidfall" # Complete TF-IDF in one file
 
 stemmer = PorterStemmer()
-stop_words = set(stopwords.words('english'))
+
+''' if stopwords not found, download it from nltk '''
+try:
+    stop_words = set(stopwords.words('english'))
+except:
+    nltk.download('stopwords')
+    stop_words = set(stopwords.words('english'))
 
 
 def header():
@@ -361,6 +378,31 @@ def get_relevant_docs_cosine_similarity(query, document_vectors, k = MAX_RELEVAN
     return out
 
 
+def create_save_document_vectors(word_freq_dict_list_2):
+    ''' creates and saves document vectors in CSV format '''
+
+    ''' GLOBAL VARIABLES '''
+    global NO_OF_FILES
+    global DOC_VEC_FILE
+    global DOC_VEC_LENGTH_FILE
+
+    print("Pre-computed document vectors file not found")
+    print(" Calculating Document Vectors for all document ..."),
+    document_vectors = create_document_vector(word_freq_dict_list_2)
+    print("DONE.")
+
+    print(" Saving calculated Document Vectors to CSV ..."),
+    data = asarray(document_vectors)
+    savetxt(DOC_VEC_FILE, data, delimiter=',')
+    print("DONE.\n")
+
+    doc_vec_length_file = open(DOC_VEC_LENGTH_FILE, "w+")
+    doc_vec_length_file.write(str(NO_OF_FILES))
+    doc_vec_length_file.close()
+
+    return document_vectors
+
+
 def main():
     ''' MAIN FUNCTION starts here '''
     header()
@@ -580,9 +622,24 @@ def main():
     TF_IDF_LIST = copy.deepcopy(tf_idf_list)
     # print("UNIQUE_WORD_COUNT:",UNIQUE_WORD_COUNT)
 
-    print(" Calculating Document Vectors for all document ..."),
-    document_vectors = create_document_vector(word_freq_dict_list_2)
-    print("DONE.")
+    ''' added on 15 JAN, save document vectors in CSV '''
+    if not os.path.exists(DOC_VEC_FILE):
+        document_vectors = create_save_document_vectors(word_freq_dict_list_2)
+    else:
+        if not os.path.exists(DOC_VEC_LENGTH_FILE):
+            document_vectors = create_save_document_vectors(word_freq_dict_list_2)
+        else:
+            doc_vec_length_file = open(DOC_VEC_LENGTH_FILE, "r")
+            doc_vec_row_count = doc_vec_length_file.readline()
+            doc_vec_length_file.close()
+            doc_vec_row_count = int(doc_vec_row_count) if doc_vec_row_count else 0
+
+            if doc_vec_row_count < NO_OF_FILES:
+                document_vectors = create_save_document_vectors(word_freq_dict_list_2)
+            else:
+                print("Pre-computed document vectors file found.\n Reading CSV ..."),
+                document_vectors = loadtxt(DOC_VEC_FILE, delimiter=',')
+                print("DONE.\n")
 
     relevant_docs_cossim_list = [None] * NO_OF_QUERY_DOCS
 
