@@ -1,8 +1,8 @@
 # Web Systems and Algorithms (_CSc 559_)
 
 ### Pre-requisite
-1. Python 2.7.15 (``https://www.python.org/downloads/release/python-2715/``)
-2. pip (``https://pip.pypa.io/en/stable/installing/``)
+1. Python 2.7.15 ([``https://www.python.org/downloads/release/python-2715/``](https://www.python.org/downloads/release/python-2715/))
+2. pip ([``https://pip.pypa.io/en/stable/installing/``](https://pip.pypa.io/en/stable/installing/))
 
 ### Installing dependencies
 1. Go to ``WSA_Labs`` folder
