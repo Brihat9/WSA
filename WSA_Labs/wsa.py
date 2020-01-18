@@ -699,13 +699,13 @@ def main():
             avg_precision = sum_precision / NO_OF_QUERY_DOCS
             avg_recall = sum_recall / NO_OF_QUERY_DOCS
 
-            print("\n AVG Precision: " + str(precision))
-            print(" AVG Recall: " + str(precision))
+            print("\n AVG Precision: " + str(avg_precision))
+            print(" AVG Recall: " + str(avg_recall))
             print(" * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * \n")
 
             ''' writing to the file '''
-            precision_recall_file.write("\n" + " AVG Precision: " + str(precision))
-            precision_recall_file.write("\n" + " AVG Recall: " + str(precision))
+            precision_recall_file.write("\n" + " AVG Precision: " + str(avg_precision))
+            precision_recall_file.write("\n" + " AVG Recall: " + str(avg_recall))
             precision_recall_file.write("\n * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * \n")
 
             precision_recall_file.close()
@@ -781,9 +781,6 @@ def main():
         ''' for top k- most ranked documents '''
         precision_recall_cases = [10, 50, 100, 500]
 
-        sum_precision = 0.0
-        sum_recall = 0.0
-
         relevant_docs_cossim_list = [None] * NO_OF_QUERY_DOCS
 
         ''' displays precision and recall score for each query, does not save score '''
@@ -858,13 +855,13 @@ def main():
             avg_precision = sum_precision / NO_OF_QUERY_DOCS
             avg_recall = sum_recall / NO_OF_QUERY_DOCS
 
-            print("\n AVG Precision: " + str(precision))
-            print(" AVG Recall: " + str(precision))
+            print("\n AVG Precision: " + str(avg_precision))
+            print(" AVG Recall: " + str(avg_recall))
             print(" * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * \n")
 
             ''' writing to the file '''
-            precision_recall_file.write("\n" + " AVG Precision: " + str(precision))
-            precision_recall_file.write("\n" + " AVG Recall: " + str(precision))
+            precision_recall_file.write("\n" + " AVG Precision: " + str(avg_precision))
+            precision_recall_file.write("\n" + " AVG Recall: " + str(avg_recall))
             precision_recall_file.write("\n * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * \n")
 
             precision_recall_file.close()

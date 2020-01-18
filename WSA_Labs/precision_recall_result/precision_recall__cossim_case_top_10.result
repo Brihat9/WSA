@@ -121,6 +121,6 @@ For Case 10
   Recall for Query 10: 0.5
 			* * *
 
- AVG Precision: 0.01
- AVG Recall: 0.01
+ AVG Precision: 0.0042
+ AVG Recall: 0.4175
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
