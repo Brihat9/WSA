@@ -1,0 +1,125 @@
+
+For Case 10
+ For Query #1
+  # of Retrieved Docs: 10
+  # of Relevant Docs: 8
+
+  Relevant Docs: [27, 28, 262, 160, 20, 263, 654, 495]
+  Relevant Docs Retrieved: [495, 654]
+  # of Relevant Docs Retrieved: 2
+
+  Precision for Query 1: 0.2
+  Recall for Query 1: 0.25
+			* * *
+
+ For Query #2
+  # of Retrieved Docs: 10
+  # of Relevant Docs: 6
+
+  Relevant Docs: [86, 194, 650, 649, 652, 624]
+  Relevant Docs Retrieved: [652]
+  # of Relevant Docs Retrieved: 1
+
+  Precision for Query 2: 0.1
+  Recall for Query 2: 0.166666666667
+			* * *
+
+ For Query #3
+  # of Retrieved Docs: 10
+  # of Relevant Docs: 5
+
+  Relevant Docs: [64, 265, 65, 311, 496]
+  Relevant Docs Retrieved: [496]
+  # of Relevant Docs Retrieved: 1
+
+  Precision for Query 3: 0.1
+  Recall for Query 3: 0.2
+			* * *
+
+ For Query #4
+  # of Retrieved Docs: 10
+  # of Relevant Docs: 3
+
+  Relevant Docs: [64, 65, 496]
+  Relevant Docs Retrieved: [64, 65]
+  # of Relevant Docs Retrieved: 2
+
+  Precision for Query 4: 0.2
+  Recall for Query 4: 0.666666666667
+			* * *
+
+ For Query #5
+  # of Retrieved Docs: 10
+  # of Relevant Docs: 3
+
+  Relevant Docs: [463, 462, 497]
+  Relevant Docs Retrieved: []
+  # of Relevant Docs Retrieved: 0
+
+  Precision for Query 5: 0.0
+  Recall for Query 5: 0.0
+			* * *
+
+ For Query #6
+  # of Retrieved Docs: 10
+  # of Relevant Docs: 4
+
+  Relevant Docs: [266, 106, 196, 498]
+  Relevant Docs Retrieved: []
+  # of Relevant Docs Retrieved: 0
+
+  Precision for Query 6: 0.0
+  Recall for Query 6: 0.0
+			* * *
+
+ For Query #7
+  # of Retrieved Docs: 10
+  # of Relevant Docs: 3
+
+  Relevant Docs: [106, 196, 498]
+  Relevant Docs Retrieved: []
+  # of Relevant Docs Retrieved: 0
+
+  Precision for Query 7: 0.0
+  Recall for Query 7: 0.0
+			* * *
+
+ For Query #8
+  # of Retrieved Docs: 10
+  # of Relevant Docs: 4
+
+  Relevant Docs: [196, 197, 198, 498]
+  Relevant Docs Retrieved: []
+  # of Relevant Docs Retrieved: 0
+
+  Precision for Query 8: 0.0
+  Recall for Query 8: 0.0
+			* * *
+
+ For Query #9
+  # of Retrieved Docs: 10
+  # of Relevant Docs: 10
+
+  Relevant Docs: [32, 67, 164, 639, 715, 716, 719, 1379, 717, 499]
+  Relevant Docs Retrieved: []
+  # of Relevant Docs Retrieved: 0
+
+  Precision for Query 9: 0.0
+  Recall for Query 9: 0.0
+			* * *
+
+ For Query #10
+  # of Retrieved Docs: 10
+  # of Relevant Docs: 10
+
+  Relevant Docs: [87, 88, 104, 267, 268, 269, 270, 407, 408, 500]
+  Relevant Docs Retrieved: [270]
+  # of Relevant Docs Retrieved: 1
+
+  Precision for Query 10: 0.1
+  Recall for Query 10: 0.1
+			* * *
+
+ AVG Precision: 0.1
+ AVG Recall: 0.1
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 

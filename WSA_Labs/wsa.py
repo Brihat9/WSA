@@ -22,18 +22,23 @@ NO_OF_FILES = 1400
 NO_OF_QUERY_DOCS = 10 # total number of query documents [1-10]
 MAX_RELEVANT_DOCS = 10 # default number of relevant document to return
 
-folders = ["tfs", "tfidfs", "docvec"]
+folders = ["tfs", "tfidfs", "docvec", "precision_recall_result"]
 
 # create folders if they do not exist
 for folder_name in folders:
     if not os.path.exists(folder_name):
+        print("Creating directory: " + folder_name + " ..."),
         os.mkdir(folder_name)
+        print("DONE.")
 
 TF_FILE = "tfs\\tf"
 TFIDF_FILE = "tfidfs\\tfidf"
 
 DOC_VEC_FILE = "docvec\\docvecall.csv"
 DOC_VEC_LENGTH_FILE = "docvec\\docveclength"
+
+RELEVANT_DOCS_LIST_FILE = "relevant_doc_ids"
+PRECISION_RECALL_DIR = "precision_recall_result\\precision_recall_"
 
 ''' some global variables defined for cosine similarity calculation '''
 UNIQUE_WORD_LIST = []
@@ -414,6 +419,8 @@ def main():
     global NO_OF_FILES
     global NO_OF_QUERY_DOCS
     global TF_IDF_LIST
+    global PRECISION_RECALL_DIR
+    global RELEVANT_DOCS_LIST_FILE
 
     ''' REQUIRED VARIABLES '''
     doc = [None] * NO_OF_FILES
@@ -614,6 +621,99 @@ def main():
         print(relevant_docs_res[index])
 
 
+    ''' Precision and Recall Part '''
+    print("\n\nPRECISION AND RECALL PART\n-------------------------")
+    relevant_docs_all = [None] * NO_OF_QUERY_DOCS
+
+    if os.path.exists(RELEVANT_DOCS_LIST_FILE):
+        ''' get relevant doc ids from file '''
+        relevant_docs_list_file = open(RELEVANT_DOCS_LIST_FILE, "r")
+        for index in range(NO_OF_QUERY_DOCS):
+            relevant_docs_all[index] = eval(relevant_docs_list_file.readline())
+        relevant_docs_list_file.close()
+
+        ''' for testing purpose only '''
+        # print(relevant_docs_all)
+        # print(type(relevant_docs_all[0]))
+
+        ''' for top k- most ranked documents '''
+        precision_recall_cases = [10, 50, 100, 500]
+
+        ''' displays precision and recall score for each query, does not save score '''
+        for case in precision_recall_cases:
+            precision_recall_filename = PRECISION_RECALL_DIR + "case_top_" + str(case) + ".result"
+            precision_recall_file = open(precision_recall_filename, "w+")
+
+            # number of document to retrieve
+            num_retrieved = int(case)
+
+            sum_precision = 0.0
+            sum_recall = 0.0
+
+            print("\nFOR CASE " + str(case) + "\n-----------")
+            precision_recall_file.write("\n" + "For Case " + str(case))
+
+            for index in range(NO_OF_QUERY_DOCS):
+                # number of document to retrieve
+                num_relevant = len(relevant_docs_all[index])
+
+                # get matching document
+                relevant_docs_res[index] = get_matching_docs(tf_idf_list, query_docs[index], case)
+
+                # find relevant document among retrieved documents
+                relevant_retrieved_list = [x for x in relevant_docs_res[index] if x in relevant_docs_all[index]]
+                num_relevant_retrieved = len(relevant_retrieved_list)
+
+                # display result
+                print("\n For Query #" + str(index+1))
+                print("  # of Retrieved Docs: " + str(num_retrieved))
+                print("  # of Relevant Docs: " + str(num_relevant))
+                print("\n  Relevant Docs: " + str(relevant_docs_all[index]))
+                print("  Relevant Docs Retrieved: " + str(relevant_retrieved_list))
+                print("  # of Relevant Docs Retrieved: " + str(num_relevant_retrieved))
+
+                # calculate precision and recall
+                precision = num_relevant_retrieved / float(num_retrieved)
+                recall = num_relevant_retrieved / float(num_relevant)
+
+                # display precision and recall
+                print("\n  Precision for Query " + str(index+1) + ": " + str(precision))
+                print("  Recall for Query " + str(index+1) + ": " + str(recall))
+                print("\t\t\t* * *")
+                sum_precision += precision
+                sum_recall += recall
+
+
+                ''' writing to the file '''
+                precision_recall_file.write("\n For Query #" + str(index+1))
+                precision_recall_file.write("\n" + "  # of Retrieved Docs: " + str(num_retrieved))
+                precision_recall_file.write("\n" + "  # of Relevant Docs: " + str(num_relevant))
+                precision_recall_file.write("\n" + "\n  Relevant Docs: " + str(relevant_docs_all[index]))
+                precision_recall_file.write("\n" + "  Relevant Docs Retrieved: " + str(relevant_retrieved_list))
+                precision_recall_file.write("\n" + "  # of Relevant Docs Retrieved: " + str(num_relevant_retrieved))
+                precision_recall_file.write("\n" + "\n  Precision for Query " + str(index+1) + ": " + str(precision))
+                precision_recall_file.write("\n" + "  Recall for Query " + str(index+1) + ": " + str(recall))
+                precision_recall_file.write("\n\t\t\t* * *\n")
+
+            # calculate and display average precision and recall
+            avg_precision = sum_precision / NO_OF_QUERY_DOCS
+            avg_recall = sum_recall / NO_OF_QUERY_DOCS
+
+            print("\n AVG Precision: " + str(precision))
+            print(" AVG Recall: " + str(precision))
+            print(" * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * \n")
+
+            ''' writing to the file '''
+            precision_recall_file.write("\n" + " AVG Precision: " + str(precision))
+            precision_recall_file.write("\n" + " AVG Recall: " + str(precision))
+            precision_recall_file.write("\n * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * \n")
+
+            precision_recall_file.close()
+    else:
+        print(" Relevant Docs File not found.")
+
+    print("\nPRECISION AND RECALL PART END.")
+
     ''' MATCHING RELEVANT DOCUMENT USING COSINE SIMILARITY '''
     print("\n\nMatching relevant documents using Cosine Similarity ...")
     print("-------------------------------------------------------")
@@ -661,6 +761,117 @@ def main():
         print("\nMatched relevant documents for Query #" + str(index + 1))
         # print(" " + str(query_docs[index].split("\n")[0]))
         print(list(relevant_docs_cossim_list[index]))
+
+
+    ''' Precision and Recall Part (Cosine Similarity) here '''
+    print("\n\nPRECISION AND RECALL PART (COSINE SIMILARITY)\n---------------------------------------------")
+    relevant_docs_all = [None] * NO_OF_QUERY_DOCS
+
+    if os.path.exists(RELEVANT_DOCS_LIST_FILE):
+        ''' get relevant doc ids from file '''
+        relevant_docs_list_file = open(RELEVANT_DOCS_LIST_FILE, "r")
+        for index in range(NO_OF_QUERY_DOCS):
+            relevant_docs_all[index] = eval(relevant_docs_list_file.readline())
+        relevant_docs_list_file.close()
+
+        ''' for testing purpose only '''
+        # print(relevant_docs_all)
+        # print(type(relevant_docs_all[0]))
+
+        ''' for top k- most ranked documents '''
+        precision_recall_cases = [10, 50, 100, 500]
+
+        sum_precision = 0.0
+        sum_recall = 0.0
+
+        relevant_docs_cossim_list = [None] * NO_OF_QUERY_DOCS
+
+        ''' displays precision and recall score for each query, does not save score '''
+        for case in precision_recall_cases:
+            precision_recall_filename = PRECISION_RECALL_DIR + "_cossim_case_top_" + str(case) + ".result"
+            precision_recall_file = open(precision_recall_filename, "w+")
+
+            ''' for testing purpose only '''
+            # print(relevant_docs_cossim_list)
+            # relevant_docs_res[index] = get_matching_docs(tf_idf_list, query_docs[index], case)
+
+            sum_precision = 0.0
+            sum_recall = 0.0
+
+            precision_recall_file.write("COSINE SIMILARITY | PRECISION AND RECALL\n")
+
+            print("FOR CASE " + str(case) + "\n------------")
+            precision_recall_file.write("\n" + "For Case " + str(case))
+
+            for index in range(NO_OF_QUERY_DOCS):
+                # number of document to retrieve
+                num_relevant = len(relevant_docs_all[index])
+
+                print("\n For Query #" + str(index+1))
+
+                # find matching document using cosine similarity
+                print("  Finding " + str(case) + "- most relevant documents for query #" + str(index + 1) + " ...")
+                relevant_docs_cossim_list[index] = get_relevant_docs_cosine_similarity(query_docs[index], document_vectors, case)
+
+                ''' for testing purpose only '''
+                # print("")
+                # print(relevant_docs_cossim_list[index])
+                # print(list(relevant_docs_cossim_list[index]))
+
+                print("\n  DONE.\n")
+
+                # find relevant document among retrieved documents
+                relevant_retrieved_list = [x for x in list(relevant_docs_cossim_list[index]) if x in relevant_docs_all[index]]
+                num_relevant_retrieved = len(relevant_retrieved_list)
+
+                # display result
+                print("  # of Retrieved Docs: " + str(num_retrieved))
+                print("  # of Relevant Docs: " + str(num_relevant))
+                print("\n  Relevant Docs: " + str(relevant_docs_all[index]))
+                print("  Relevant Docs Retrieved: " + str(relevant_retrieved_list))
+                print("  # of Relevant Docs Retrieved: " + str(num_relevant_retrieved))
+
+                # calculate precision and recall
+                precision = num_relevant_retrieved / float(num_retrieved)
+                recall = num_relevant_retrieved / float(num_relevant)
+
+                # display precision and recall
+                print("\n  Precprecision and recallision for Query " + str(index+1) + ": " + str(precision))
+                print("  Recall for Query " + str(index+1) + ": " + str(recall))
+                print("\t\t\t* * *")
+                sum_precision += precision
+                sum_recall += recall
+
+
+                ''' writing to the file '''
+                precision_recall_file.write("\n For Query #" + str(index+1))
+                precision_recall_file.write("\n" + "  # of Retrieved Docs: " + str(num_retrieved))
+                precision_recall_file.write("\n" + "  # of Relevant Docs: " + str(num_relevant))
+                precision_recall_file.write("\n" + "\n  Relevant Docs: " + str(relevant_docs_all[index]))
+                precision_recall_file.write("\n" + "  Relevant Docs Retrieved: " + str(relevant_retrieved_list))
+                precision_recall_file.write("\n" + "  # of Relevant Docs Retrieved: " + str(num_relevant_retrieved))
+                precision_recall_file.write("\n" + "\n  Precision for Query " + str(index+1) + ": " + str(precision))
+                precision_recall_file.write("\n" + "  Recall for Query " + str(index+1) + ": " + str(recall))
+                precision_recall_file.write("\n\t\t\t* * *\n")
+
+            # calculate and display average precision and recall
+            avg_precision = sum_precision / NO_OF_QUERY_DOCS
+            avg_recall = sum_recall / NO_OF_QUERY_DOCS
+
+            print("\n AVG Precision: " + str(precision))
+            print(" AVG Recall: " + str(precision))
+            print(" * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * \n")
+
+            ''' writing to the file '''
+            precision_recall_file.write("\n" + " AVG Precision: " + str(precision))
+            precision_recall_file.write("\n" + " AVG Recall: " + str(precision))
+            precision_recall_file.write("\n * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * \n")
+
+            precision_recall_file.close()
+    else:
+        print(" Relevant Docs File not found.")
+
+    print("\nPRECISION AND RECALL PART (COSINE SIMILARITY) END.")
 
     print("\nDONE.")
 
