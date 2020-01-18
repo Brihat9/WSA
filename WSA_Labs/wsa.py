@@ -666,19 +666,19 @@ def main():
 
                 # display result
                 print("\n For Query #" + str(index+1))
-                print("  # of Retrieved Docs: " + str(num_retrieved))
-                print("  # of Relevant Docs: " + str(num_relevant))
-                print("\n  Relevant Docs: " + str(relevant_docs_all[index]))
-                print("  Relevant Docs Retrieved: " + str(relevant_retrieved_list))
-                print("  # of Relevant Docs Retrieved: " + str(num_relevant_retrieved))
+                # print("  # of Retrieved Docs: " + str(num_retrieved))
+                # print("  # of Relevant Docs: " + str(num_relevant))
+                # print("\n  Relevant Docs: " + str(relevant_docs_all[index]))
+                # print("  Relevant Docs Retrieved: " + str(relevant_retrieved_list))
+                # print("  # of Relevant Docs Retrieved: " + str(num_relevant_retrieved))
 
                 # calculate precision and recall
                 precision = num_relevant_retrieved / float(num_retrieved)
                 recall = num_relevant_retrieved / float(num_relevant)
 
                 # display precision and recall
-                print("\n  Precision for Query " + str(index+1) + ": " + str(precision))
-                print("  Recall for Query " + str(index+1) + ": " + str(recall))
+                print("\n  Precision: " + str(precision))
+                print("  Recall: " + str(recall))
                 print("\t\t\t* * *")
                 sum_precision += precision
                 sum_recall += recall
@@ -825,19 +825,19 @@ def main():
                 num_relevant_retrieved = len(relevant_retrieved_list)
 
                 # display result
-                print("  # of Retrieved Docs: " + str(num_retrieved))
-                print("  # of Relevant Docs: " + str(num_relevant))
-                print("\n  Relevant Docs: " + str(relevant_docs_all[index]))
-                print("  Relevant Docs Retrieved: " + str(relevant_retrieved_list))
-                print("  # of Relevant Docs Retrieved: " + str(num_relevant_retrieved))
+                # print("  # of Retrieved Docs: " + str(num_retrieved))
+                # print("  # of Relevant Docs: " + str(num_relevant))
+                # print("\n  Relevant Docs: " + str(relevant_docs_all[index]))
+                # print("  Relevant Docs Retrieved: " + str(relevant_retrieved_list))
+                # print("  # of Relevant Docs Retrieved: " + str(num_relevant_retrieved))
 
                 # calculate precision and recall
                 precision = num_relevant_retrieved / float(num_retrieved)
                 recall = num_relevant_retrieved / float(num_relevant)
 
                 # display precision and recall
-                print("\n  Precprecision and recallision for Query " + str(index+1) + ": " + str(precision))
-                print("  Recall for Query " + str(index+1) + ": " + str(recall))
+                print("\n  Precision: " + str(precision))
+                print("  Recall: " + str(recall))
                 print("\t\t\t* * *")
                 sum_precision += precision
                 sum_recall += recall
