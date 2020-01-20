@@ -211,14 +211,16 @@ def get_matching_docs(tf_idf_list, query, rev_doc_num = MAX_RELEVANT_DOCS):
     '''
     query_content_wo_tags = cleanhtml(query)
     query_tokens = tokenize(query_content_wo_tags)
-    query_stemmed= [stemmer.stem(word) for word in query_tokens]
-    stop_word_removed_query = [w for w in query_stemmed if not w in stop_words]
+
+    ''' changed: remove stop word before stemming '''
+    stop_word_removed_query = [w for w in query_tokens if not w in stop_words]
+    query_stemmed= [stemmer.stem(word) for word in stop_word_removed_query]
 
     query_weight = dict()
 
     for index in range(NO_OF_FILES):
         for key, val in tf_idf_list[index].items():
-            for token in query_tokens:
+            for token in query_stemmed:
                 if token == key:
                     try:
                         query_weight[index+1] += tf_idf_list[index][key]
@@ -272,21 +274,21 @@ def preprocess_query(query):
     ''' functions that preprocesses given query text and
         returns list of tokens
     '''
-
     # removes html tags (if any)
     query_content_wo_tags = cleanhtml(query)
 
     # tokenize given query doc
     query_tokens = tokenize(query_content_wo_tags)
 
-    # applies Porter Stemmer to tokens
-    query_stemmed= [stemmer.stem(word) for word in query_tokens]
+    ''' changed: remove stop word before stemming '''
+    # removes stop words from query tokens
+    stop_word_removed_query = [w for w in query_tokens if not w in stop_words]
 
-    # removes stop words from stemmed tokens
-    stop_word_removed_query = [w for w in query_stemmed if not w in stop_words]
+    # applies Porter Stemmer to query without stop words
+    query_stemmed= [stemmer.stem(word) for word in stop_word_removed_query]
 
     # returns processed tokens for given query
-    return stop_word_removed_query
+    return query_stemmed
 
 
 def generate_document_vector(query_doc):
@@ -465,6 +467,16 @@ def main():
         doc_word_list[index] = tokenize(content_wo_tags[index])
     print("DONE.\n")
 
+    ''' changed: remove stop word before stemming '''
+    ''' Stop Word Removal '''
+    ''' made global '''
+    # stop_words = set(stopwords.words('english'))
+
+    print("Removing stop words ..."),
+    for index in range(NO_OF_FILES):
+        stop_word_removed_word_list[index] = [w for w in doc_word_list[index] if not w in stop_words]
+    print("DONE.\n")
+
 
     ''' Porter Stemmer '''
     ''' made global '''
@@ -473,23 +485,13 @@ def main():
     print("Stemming (Porter Stemmer) ..."),
     for index in range(NO_OF_FILES):
         # [stemmer.stem(word) for word in doc_word_list[index]]
-        stemmed_word_list[index] = [stemmer.stem(word) for word in doc_word_list[index]]
-    print("DONE.\n")
-
-
-    ''' Stop Word Removal '''
-    ''' made global '''
-    # stop_words = set(stopwords.words('english'))
-
-    print("Removing stop words ..."),
-    for index in range(NO_OF_FILES):
-        stop_word_removed_word_list[index] = [w for w in stemmed_word_list[index] if not w in stop_words]
+        stemmed_word_list[index] = [stemmer.stem(word) for word in stop_word_removed_word_list[index]]
     print("DONE.\n")
 
     ''' Test for Stemmer and Stop Word Removal '''
     # print("word list [0] vs after stemming and stop word removal [0]")
-    # print(len(stemmed_word_list[0]))
     # print(len(stop_word_removed_word_list[0]))
+    # print(len(stemmed_word_list[0]))
 
 
     ''' word_list -> {word: freq} pair for each document -> list of these dict for all document '''
@@ -497,7 +499,7 @@ def main():
     print("Creating LIST of each word, word_count pair ..."),
     for index in range(NO_OF_FILES):
         word_freq_dict_list[index] = word_list_to_freq_dict(doc_word_list[index])
-        word_freq_dict_list_2[index] = word_list_to_freq_dict(stop_word_removed_word_list[index])
+        word_freq_dict_list_2[index] = word_list_to_freq_dict(stemmed_word_list[index])
     print("DONE.\n")
 
 
@@ -551,21 +553,21 @@ def main():
         ''' TF, IDF, TF-IDF part here '''
         ''' calculate term frequencies for each document '''
         print("\nPre-computed TF-IDF values not found")
-        print("\nCalculating Term Frequencies ..."),
+        print("\n Calculating Term Frequencies ..."),
         for index in range(NO_OF_FILES):
             tf_file = open(TF_FILE + str(index).zfill(4), "w+")
-            tf_list[index] = computeTF(word_freq_dict_list_2[index], stop_word_removed_word_list[index])
+            tf_list[index] = computeTF(word_freq_dict_list_2[index], stemmed_word_list[index])
             tf_file.write(str(tf_list[index]))
             tf_file.close()
         print("DONE.\n")
 
         ''' calculate inverse document frequencies of all document '''
-        print("Calculating Inverse Document Frequencies ..."),
-        idf = computeIDF(word_freq_dict_list_2,word_dict_all_2)
+        print(" Calculating Inverse Document Frequencies ..."),
+        idf = computeIDF(word_freq_dict_list_2, word_dict_all_2)
         print("DONE.\n")
 
         ''' calculates TF-IDF for all document '''
-        print("Calculating TF-IDF ..."),
+        print(" Calculating TF-IDF ..."),
         for index in range(NO_OF_FILES):
             tfidf_file = open(TFIDF_FILE + str(index).zfill(4), "w+")
             tf_idf_list[index] = computeTFIDF(tf_list[index], idf)

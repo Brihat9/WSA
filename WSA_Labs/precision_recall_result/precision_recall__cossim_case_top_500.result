@@ -102,7 +102,7 @@ For Case 500
   # of Relevant Docs: 10
 
   Relevant Docs: [32, 67, 164, 639, 715, 716, 719, 1379, 717, 499]
-  Relevant Docs Retrieved: [164, 716, 32, 717, 1379, 715, 67]
+  Relevant Docs Retrieved: [164, 32, 717, 716, 1379, 715, 67]
   # of Relevant Docs Retrieved: 7
 
   Precision for Query 9: 0.014

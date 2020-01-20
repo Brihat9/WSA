@@ -66,11 +66,11 @@ For Case 100
   # of Relevant Docs: 4
 
   Relevant Docs: [266, 106, 196, 498]
-  Relevant Docs Retrieved: [498, 106, 266]
-  # of Relevant Docs Retrieved: 3
+  Relevant Docs Retrieved: [498, 106, 266, 196]
+  # of Relevant Docs Retrieved: 4
 
-  Precision for Query 6: 0.03
-  Recall for Query 6: 0.75
+  Precision for Query 6: 0.04
+  Recall for Query 6: 1.0
 			* * *
 
  For Query #7
@@ -102,11 +102,11 @@ For Case 100
   # of Relevant Docs: 10
 
   Relevant Docs: [32, 67, 164, 639, 715, 716, 719, 1379, 717, 499]
-  Relevant Docs Retrieved: [164, 716, 32]
-  # of Relevant Docs Retrieved: 3
+  Relevant Docs Retrieved: [164, 32]
+  # of Relevant Docs Retrieved: 2
 
-  Precision for Query 9: 0.03
-  Recall for Query 9: 0.3
+  Precision for Query 9: 0.02
+  Recall for Query 9: 0.2
 			* * *
 
  For Query #10
@@ -122,5 +122,5 @@ For Case 100
 			* * *
 
  AVG Precision: 0.039
- AVG Recall: 0.683333333333
+ AVG Recall: 0.698333333333
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
