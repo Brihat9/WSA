@@ -792,6 +792,8 @@ def main():
             # print(relevant_docs_cossim_list)
             # relevant_docs_res[index] = get_matching_docs(tf_idf_list, query_docs[index], case)
 
+            num_retrieved = int(case)
+
             sum_precision = 0.0
             sum_recall = 0.0
 

@@ -2,125 +2,125 @@ COSINE SIMILARITY | PRECISION AND RECALL
 
 For Case 50
  For Query #1
-  # of Retrieved Docs: 500
+  # of Retrieved Docs: 50
   # of Relevant Docs: 8
 
   Relevant Docs: [27, 28, 262, 160, 20, 263, 654, 495]
   Relevant Docs Retrieved: [495, 654, 20, 28, 27, 160]
   # of Relevant Docs Retrieved: 6
 
-  Precision for Query 1: 0.012
+  Precision for Query 1: 0.12
   Recall for Query 1: 0.75
 			* * *
 
  For Query #2
-  # of Retrieved Docs: 500
+  # of Retrieved Docs: 50
   # of Relevant Docs: 6
 
   Relevant Docs: [86, 194, 650, 649, 652, 624]
   Relevant Docs Retrieved: [624, 650, 649, 652, 86]
   # of Relevant Docs Retrieved: 5
 
-  Precision for Query 2: 0.01
+  Precision for Query 2: 0.1
   Recall for Query 2: 0.833333333333
 			* * *
 
  For Query #3
-  # of Retrieved Docs: 500
+  # of Retrieved Docs: 50
   # of Relevant Docs: 5
 
   Relevant Docs: [64, 265, 65, 311, 496]
   Relevant Docs Retrieved: [496]
   # of Relevant Docs Retrieved: 1
 
-  Precision for Query 3: 0.002
+  Precision for Query 3: 0.02
   Recall for Query 3: 0.2
 			* * *
 
  For Query #4
-  # of Retrieved Docs: 500
+  # of Retrieved Docs: 50
   # of Relevant Docs: 3
 
   Relevant Docs: [64, 65, 496]
   Relevant Docs Retrieved: [64, 65]
   # of Relevant Docs Retrieved: 2
 
-  Precision for Query 4: 0.004
+  Precision for Query 4: 0.04
   Recall for Query 4: 0.666666666667
 			* * *
 
  For Query #5
-  # of Retrieved Docs: 500
+  # of Retrieved Docs: 50
   # of Relevant Docs: 3
 
   Relevant Docs: [463, 462, 497]
   Relevant Docs Retrieved: [462, 463]
   # of Relevant Docs Retrieved: 2
 
-  Precision for Query 5: 0.004
+  Precision for Query 5: 0.04
   Recall for Query 5: 0.666666666667
 			* * *
 
  For Query #6
-  # of Retrieved Docs: 500
+  # of Retrieved Docs: 50
   # of Relevant Docs: 4
 
   Relevant Docs: [266, 106, 196, 498]
   Relevant Docs Retrieved: [498, 106]
   # of Relevant Docs Retrieved: 2
 
-  Precision for Query 6: 0.004
+  Precision for Query 6: 0.04
   Recall for Query 6: 0.5
 			* * *
 
  For Query #7
-  # of Retrieved Docs: 500
+  # of Retrieved Docs: 50
   # of Relevant Docs: 3
 
   Relevant Docs: [106, 196, 498]
   Relevant Docs Retrieved: [106, 498]
   # of Relevant Docs Retrieved: 2
 
-  Precision for Query 7: 0.004
+  Precision for Query 7: 0.04
   Recall for Query 7: 0.666666666667
 			* * *
 
  For Query #8
-  # of Retrieved Docs: 500
+  # of Retrieved Docs: 50
   # of Relevant Docs: 4
 
   Relevant Docs: [196, 197, 198, 498]
   Relevant Docs Retrieved: [498, 197, 196]
   # of Relevant Docs Retrieved: 3
 
-  Precision for Query 8: 0.006
+  Precision for Query 8: 0.06
   Recall for Query 8: 0.75
 			* * *
 
  For Query #9
-  # of Retrieved Docs: 500
+  # of Retrieved Docs: 50
   # of Relevant Docs: 10
 
   Relevant Docs: [32, 67, 164, 639, 715, 716, 719, 1379, 717, 499]
   Relevant Docs Retrieved: [164, 716]
   # of Relevant Docs Retrieved: 2
 
-  Precision for Query 9: 0.004
+  Precision for Query 9: 0.04
   Recall for Query 9: 0.2
 			* * *
 
  For Query #10
-  # of Retrieved Docs: 500
+  # of Retrieved Docs: 50
   # of Relevant Docs: 10
 
   Relevant Docs: [87, 88, 104, 267, 268, 269, 270, 407, 408, 500]
   Relevant Docs Retrieved: [500, 270, 268, 407, 267, 104, 88, 269, 87, 408]
   # of Relevant Docs Retrieved: 10
 
-  Precision for Query 10: 0.02
+  Precision for Query 10: 0.2
   Recall for Query 10: 1.0
 			* * *
 
- AVG Precision: 0.007
+ AVG Precision: 0.07
  AVG Recall: 0.623333333333
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
