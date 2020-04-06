@@ -19,6 +19,8 @@
 
 3. ``weather.csv`` weather dataset
 
+4. ``weather_new.csv`` slightly changed ``weather.csv`` file
+
 4. ``requirements.txt`` lists dependencies required for ``weather_dtree.py``
 
 5. used ``anytree`` ([``https://anytree.readthedocs.io/en/latest/index.html``](https://anytree.readthedocs.io/en/latest/index.html)) for displaying decision tree
